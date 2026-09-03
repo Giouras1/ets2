@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Quick ETS2 DEF generator for one country, city, company depot, or ferry/port definition at a time.">
+<title>ETS2 DEF Forge — Quick Single DEF</title>
+<style>
+:root{
+  --bg:#0c1219;--surface:#151f2a;--surface2:#1a2633;--line:#334557;--text:#f4f7fa;
+  --muted:#aab7c5;--accent:#ff9638;--accent2:#ffb36d;--good:#67d9a7;--warn:#f3cb69;--bad:#ff8484;
+  --code:#090e13;--shadow:0 20px 60px rgba(0,0,0,.3);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box} html{color-scheme:dark} body{margin:0;background:radial-gradient(circle at 80% 0,rgba(76,113,148,.12),transparent 36%),var(--bg);color:var(--text);line-height:1.5}
+button,input,select,textarea{font:inherit} button{cursor:pointer} code,textarea.output{font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace}
+.wrap{width:min(1320px,calc(100% - 32px));margin:0 auto;padding:28px 0 48px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:22px;margin-bottom:20px}
+.kicker{font-size:12px;font-weight:800;letter-spacing:.15em;color:var(--accent);text-transform:uppercase}.title{margin:6px 0 5px;font-size:clamp(28px,4vw,42px);line-height:1.05}.subtitle{max-width:760px;color:var(--muted);margin:0;font-size:15px}
+.back{color:var(--text);text-decoration:none;border:1px solid var(--line);border-radius:9px;padding:10px 13px;background:rgba(255,255,255,.02);font-weight:700;white-space:nowrap}.back:hover{border-color:#60778f}
+.notice{border:1px solid #5b4b2f;background:rgba(243,203,105,.07);padding:12px 14px;border-radius:9px;color:#e7d7a6;font-size:13px;margin-bottom:18px}.notice strong{color:#ffe28e}
+.grid{display:grid;grid-template-columns:minmax(420px,.95fr) minmax(430px,1.05fr);gap:16px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}.card-head{padding:17px 19px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.012)}.card-head h2{font-size:17px;margin:0 0 4px}.card-head p{font-size:13px;color:var(--muted);margin:0}.card-body{padding:20px}
+.type-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}.field{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}.field label{font-weight:750;font-size:13px;color:#dce4ec}.field small{color:var(--muted);font-size:11px}.field input,.field select,.field textarea:not(.output){width:100%;background:#0f171f;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:11px 12px;outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:#6b8299;box-shadow:0 0 0 3px rgba(111,181,255,.09)}.field textarea:not(.output){min-height:95px;resize:vertical}.field.invalid input,.field.invalid select{border-color:var(--bad)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.span2{grid-column:1/-1}.checks{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin:2px 0 15px}.check{display:flex;align-items:center;gap:9px;border:1px solid #293949;padding:10px;border-radius:8px;background:#121b24;font-size:12px}.check input{accent-color:var(--accent)}
+.helpbox{grid-column:1/-1;border-left:3px solid var(--accent);background:rgba(255,150,56,.05);padding:10px 12px;color:var(--muted);font-size:12px;margin-bottom:14px}.helpbox code{color:#fff0db}
+.output-meta{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px;flex-wrap:wrap}.path{font-size:12px;color:#d5dee8;background:#101820;border:1px solid var(--line);padding:7px 9px;border-radius:7px;word-break:break-all}.status{font-size:12px;font-weight:750}.status.good{color:var(--good)}.status.bad{color:var(--bad)}.status.warn{color:var(--warn)}
+.output{width:100%;min-height:510px;resize:vertical;background:var(--code);color:#dfe7ef;border:1px solid #293a4a;border-radius:9px;padding:16px;font-size:13px;line-height:1.65;outline:none;tab-size:4;white-space:pre}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}.btn{border:1px solid var(--line);background:var(--surface2);color:var(--text);border-radius:8px;padding:10px 13px;font-weight:750}.btn:hover{border-color:#5a7188}.btn.primary{background:var(--accent);border-color:var(--accent);color:#1d1208}.btn.primary:hover{background:var(--accent2)}
+.tip{margin-top:14px;color:var(--muted);font-size:12px}.tip strong{color:#dbe4ed}
+footer{color:#7f8fa0;font-size:11px;margin-top:18px;text-align:center}
+@media(max-width:920px){.grid{grid-template-columns:1fr}.output{min-height:420px}}@media(max-width:620px){.wrap{width:min(100% - 20px,1320px);padding-top:18px}header{display:block}.back{display:inline-flex;margin-top:14px}.type-row,.form-grid{grid-template-columns:1fr}.span2,.checks,.helpbox{grid-column:auto}.checks{grid-template-columns:1fr}.output{font-size:12px;min-height:390px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <div class="kicker">ETS2 DEF Forge</div>
+    <h1 class="title">Quick single DEF builder</h1>
+    <p class="subtitle">Pick one definition type, fill the fields, then copy the generated SII text or export it. This page is deliberately simpler than the full project builder.</p>
+  </div>
+  <a class="back" href="index.html">← Full project builder</a>
+</header>
+<div class="notice"><strong>Important:</strong> ETS2 definition files are normally <code>.sii</code> or <code>.sui</code>. The <code>.def</code> export below is provided because you asked for it, but it is a convenience text file; for the game itself use the suggested <code>.sii</code> path shown beside the output.</div>
+<div class="grid">
+  <section class="card">
+    <div class="card-head"><h2>1. Choose what you are making</h2><p>Only the fields relevant to that definition are shown.</p></div>
+    <div class="card-body">
+      <div class="type-row">
+        <div class="field"><label for="type">Definition type</label><select id="type"><option value="country">Country</option><option value="city">City</option><option value="company">Existing-company depot</option><option value="ferry">Port / ferry</option></select></div>
+        <div class="field" id="ferrySubtypeField" hidden><label for="ferrySubtype">Port / ferry kind</label><select id="ferrySubtype"><option value="port">Port / terminal</option><option value="connection">Ferry connection</option></select></div>
+        <div class="field" id="infixField"><label for="infix">Mod infix</label><input id="infix" value="mymap" maxlength="12" spellcheck="false"><small>Used for <code>country.mymap.sii</code>, <code>city.mymap.sii</code> or <code>ferry.mymap.sii</code>.</small></div>
+      </div>
+      <div id="dynamicForm" class="form-grid"></div>
+    </div>
+  </section>
+  <section class="card">
+    <div class="card-head"><h2>2. Copy or export</h2><p>The output is a complete <code>SiiNunit</code> file so it can also be pasted directly into an infixed storage file.</p></div>
+    <div class="card-body">
+      <div class="output-meta"><div id="suggestedPath" class="path">/def/country.mymap.sii</div><div id="status" class="status good">Ready</div></div>
+      <textarea id="output" class="output" readonly spellcheck="false" aria-label="Generated DEF output"></textarea>
+      <div class="actions"><button class="btn primary" id="copyBtn">Copy text</button><button class="btn" id="exportDefBtn">Export .def</button><button class="btn" id="exportSiiBtn">Export .sii</button></div>
+      <div class="tip" id="tip"><strong>Tip:</strong> If you create several countries or cities, copy each generated unit into the same infixed storage file instead of overwriting the previous one.</div>
+    </div>
+  </section>
+</div>
+<footer>Offline, dependency-free, and intended for map-definition prototyping. Compare unusual fields with the extracted <code>def.scs</code> for your target game version.</footer>
+</div>
+<script>
+(()=>{
+'use strict';
+const TOKEN=/^[a-z0-9_]{1,12}$/;
+const $=s=>document.querySelector(s);
+const escAttr=v=>String(v??'').replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+const sii=v=>'"'+String(v??'').replaceAll('\\','\\\\').replaceAll('"','\\"')+'"';
+const loc=v=>v?'@@'+String(v).replace(/^@@|@@$/g,'')+'@@':'';
+const n=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
+const b=v=>v?'true':'false';
+const rawLines=v=>String(v||'').replace(/\r/g,'').split('\n').filter(x=>x.trim()).map(x=>'    '+x.trimEnd());
+const state={type:'country',sub:'port'};
+function field(id,label,value='',opts={}){return `<div class="field ${opts.span?'span2':''}" data-field="${id}"><label for="${id}">${label}${opts.req?' *':''}</label>${opts.textarea?`<textarea id="${id}" ${opts.placeholder?`placeholder="${escAttr(opts.placeholder)}"`:''}>${escAttr(value)}</textarea>`:`<input id="${id}" type="${opts.type||'text'}" value="${escAttr(value)}" ${opts.max?`maxlength="${opts.max}"`:''} ${opts.min!==undefined?`min="${opts.min}"`:''} ${opts.step?`step="${opts.step}"`:''} ${opts.placeholder?`placeholder="${escAttr(opts.placeholder)}"`:''} ${opts.spell===false?'spellcheck="false"':''}>`}${opts.help?`<small>${opts.help}</small>`:''}</div>`}
+function checkbox(id,label,checked=false){return `<label class="check"><input type="checkbox" id="${id}" ${checked?'checked':''}>${label}</label>`}
+function renderForm(){
+  const t=state.type, f=$('#dynamicForm'); $('#ferrySubtypeField').hidden=t!=='ferry'; $('#infixField').hidden=t==='company'||(t==='ferry'&&state.sub==='connection');
+  if(t==='country') f.innerHTML=field('token','Country token','newcountry',{req:true,max:12,spell:false,help:'Lowercase a-z, 0-9 and underscore; max 12.'})+field('countryId','Country ID','200',{req:true,type:'number',min:0,step:'1'})+field('name','Display name','New Country',{req:true})+field('localizedKey','Localization key','',{help:'Optional key only; @@ markers are added.'})+field('countryCode','Country code','XX',{req:true})+field('isoCode','ISO country token','xxx',{max:12,spell:false,help:'Optional token such as aut, tur, fra. Leave blank if not needed.'})+field('x','Map X','0',{type:'number',step:'any'})+field('y','Map Y','0',{type:'number',step:'any'})+field('fuelPrice','Fuel price','1.50',{type:'number',min:0,step:'0.001'})+field('timeZone','Time zone (minutes)','120',{type:'number',step:'1'})+field('timeZoneName','Time-zone name','CEST')+`<div class="checks">${checkbox('lights','Lights mandatory')}${checkbox('imperial','Imperial units')}${checkbox('leftside','Left-side traffic')}${checkbox('trailerStandalone','Trailer shares truck registration')}${checkbox('tired', 'Tired-driving offence',true)}</div>`+field('extra','Additional country_data lines','',{textarea:true,span:true,placeholder:'mass_limit_per_axle_count[]: 18000',help:'Optional raw lines copied from your current def.scs.'});
+  if(t==='city') f.innerHTML=field('token','City token','newcity',{req:true,max:12,spell:false})+field('country','Country token','',{req:true,max:12,spell:false})+field('name','City name','New City',{req:true})+field('localizedKey','Localization key','')+field('shortName','Short city name','')+field('shortLocalizedKey','Short localization key','')+field('population','Population','',{type:'number',min:0,step:'1',help:'Optional; supported by modern ETS2.'})+field('vehicleBrands','Vehicle brands','',{help:'Optional comma-separated dealer brands, e.g. volvo, scania.'})+field('timeZone','City time-zone override','',{type:'number',step:'1',help:'Leave blank to inherit the country.'})+field('timeZoneName','Time-zone name','')+`<div class="helpbox">City position is controlled by the <strong>Map Editor</strong>. This builder intentionally does not emit a <code>pos</code> field for <code>city_data</code>.</div>`+field('extra','Additional city_data lines','',{textarea:true,span:true,placeholder:'city_name_sort: "Lodz"'});
+  if(t==='company') f.innerHTML=field('company','Existing company token','',{req:true,max:12,spell:false,help:'Existing folder token under def/company/.'})+field('city','City token','',{req:true,max:12,spell:false})+field('prefab','Prefab token','',{req:true,max:12,spell:false,help:'Suffix from prefab.<token>.'})+field('fileName','File name override','',{spell:false,help:'Optional; defaults to city_prefab.sii.'})+`<div class="helpbox">This makes only a <code>company_def</code> assignment. It does not create a custom company, cargo definitions, models or prefabs.</div>`;
+  if(t==='ferry'&&state.sub==='port') f.innerHTML=field('token','Port / ferry token','newport',{req:true,max:12,spell:false})+field('name','Display name','New Port',{req:true})+field('localizedKey','Localization key','')+field('extra','Additional ferry_data lines','',{textarea:true,span:true,placeholder:'Add only fields verified in your target def.scs.'});
+  if(t==='ferry'&&state.sub==='connection') f.innerHTML=field('from','From port token','',{req:true,max:12,spell:false})+field('to','To port token','',{req:true,max:12,spell:false})+field('price','Price','100',{req:true,type:'number',min:0,step:'1'})+field('time','Travel time (minutes)','60',{req:true,type:'number',min:0,step:'1'})+field('distance','Distance','50',{req:true,type:'number',min:0,step:'1'})+`<div class="helpbox">Connections are <strong>one-way</strong>. Generate a second definition with From/To reversed if you need travel both ways.</div>`+field('extra','Additional ferry_connection lines','',{textarea:true,span:true});
+  f.querySelectorAll('input,textarea,select').forEach(el=>el.addEventListener('input',update)); update();
+}
+function val(id){return $('#'+id)?.value??''} function checked(id){return !!$('#'+id)?.checked}
+function invalid(id,on){const x=document.querySelector(`[data-field="${id}"]`);if(x)x.classList.toggle('invalid',!!on)}
+function validate(){let errs=[];document.querySelectorAll('.field.invalid').forEach(x=>x.classList.remove('invalid'));const needToken=(id,label)=>{if(!TOKEN.test(val(id))){errs.push(label+' must be a valid 1–12 character token.');invalid(id,true)}};const t=state.type;
+  if(t!=='company'&&!(t==='ferry'&&state.sub==='connection')){if(!TOKEN.test($('#infix').value)){errs.push('Mod infix must be a valid token.');$('#infix').style.borderColor='var(--bad)'}else $('#infix').style.borderColor='';}
+  if(t==='country'){needToken('token','Country token');if(val('isoCode')&&!TOKEN.test(val('isoCode'))){errs.push('ISO country token must be lowercase token syntax.');invalid('isoCode',true)}if(!val('name').trim())errs.push('Country name is required.');if(!Number.isInteger(Number(val('countryId'))))errs.push('Country ID must be an integer.');}
+  if(t==='city'){needToken('token','City token');needToken('country','Country token');if(!val('name').trim())errs.push('City name is required.');}
+  if(t==='company'){needToken('company','Company token');needToken('city','City token');needToken('prefab','Prefab token');}
+  if(t==='ferry'&&state.sub==='port'){needToken('token','Port token');if(!val('name').trim())errs.push('Port name is required.');}
+  if(t==='ferry'&&state.sub==='connection'){needToken('from','Source port');needToken('to','Destination port');if(val('from')&&val('from')===val('to'))errs.push('Source and destination cannot be the same.');for(const id of ['price','time','distance'])if(val(id)===''||!Number.isFinite(Number(val(id)))||Number(val(id))<0)errs.push(id+' must be a non-negative number.');}
+  return errs;
+}
+function generate(){const t=state.type, lines=['SiiNunit','{'];let path='',exportBase='definition',siiName='definition.sii';
+  if(t==='country'){const token=val('token')||'country',infix=$('#infix').value||'mymap';lines.push(`country_data: country.data.${token}`,'{',`    country_id: ${Math.trunc(n(val('countryId')))}`,`    name: ${sii(val('name'))}`);if(val('localizedKey'))lines.push(`    name_localized: ${sii(loc(val('localizedKey')))}`);if(val('countryCode'))lines.push(`    country_code: ${sii(val('countryCode'))}`);if(val('isoCode'))lines.push(`    iso_country_code: ${val('isoCode')}`);lines.push(`    pos: (${n(val('x'))}, 0.0, ${n(val('y'))})`,`    fuel_price: ${n(val('fuelPrice'),1.5)}`,`    lights_mandatory: ${b(checked('lights'))}`,`    imperial_units: ${b(checked('imperial'))}`,`    leftside_traffic: ${b(checked('leftside'))}`,`    trailer_standalone: ${b(checked('trailerStandalone'))}`,`    driving_tired_offence: ${b(checked('tired'))}`);if(val('timeZone')!=='')lines.push(`    time_zone: ${Math.trunc(n(val('timeZone')))}`);if(val('timeZoneName'))lines.push(`    time_zone_name: ${sii(val('timeZoneName'))}`);if(val('extra').trim())lines.push('',...rawLines(val('extra')));lines.push('}');path=`/def/country.${infix}.sii`;siiName=`country.${infix}.sii`;exportBase=`country_${token}`;}
+  if(t==='city'){const token=val('token')||'city',infix=$('#infix').value||'mymap';lines.push(`city_data: city.${token}`,'{',`    city_name: ${sii(val('name'))}`);if(val('localizedKey'))lines.push(`    city_name_localized: ${sii(loc(val('localizedKey')))}`);if(val('shortName'))lines.push(`    short_city_name: ${sii(val('shortName'))}`);if(val('shortLocalizedKey'))lines.push(`    short_city_name_localized: ${sii(loc(val('shortLocalizedKey')))}`);lines.push(`    country: ${val('country')||'unknown'}`);if(val('population')!=='')lines.push(`    population: ${Math.max(0,Math.trunc(n(val('population'))))}`);if(val('vehicleBrands').trim())val('vehicleBrands').split(',').map(x=>x.trim()).filter(Boolean).forEach(x=>lines.push(`    vehicle_brands[]: ${sii(x)}`));if(val('timeZone')!=='')lines.push(`    time_zone: ${Math.trunc(n(val('timeZone')))}`);if(val('timeZoneName'))lines.push(`    time_zone_name: ${sii(val('timeZoneName'))}`);if(val('extra').trim())lines.push('',...rawLines(val('extra')));lines.push('}');path=`/def/city.${infix}.sii`;siiName=`city.${infix}.sii`;exportBase=`city_${token}`;}
+  if(t==='company'){const company=val('company')||'company',city=val('city')||'city',prefab=val('prefab')||'prefab';lines.push(`company_def: .${city}.${prefab}`,'{',`    city: ${city}`,`    prefab: ${prefab}`,'}');const raw=val('fileName').trim().replace(/[^A-Za-z0-9_.-]/g,'_').replace(/\.sii$/i,'');const fn=(raw||`${city}_${prefab}`)+'.sii';path=`/def/company/${company}/editor/${fn}`;siiName=fn;exportBase=`${company}_${city}_${prefab}`;}
+  if(t==='ferry'&&state.sub==='port'){const token=val('token')||'port',infix=$('#infix').value||'mymap';lines.push(`ferry_data: ferry.${token}`,'{',`    ferry_name: ${sii(val('name'))}`);if(val('localizedKey'))lines.push(`    ferry_name_localized: ${sii(loc(val('localizedKey')))}`);if(val('extra').trim())lines.push('',...rawLines(val('extra')));lines.push('}');path=`/def/ferry.${infix}.sii`;siiName=`ferry.${infix}.sii`;exportBase=`ferry_${token}`;}
+  if(t==='ferry'&&state.sub==='connection'){const from=val('from')||'source',to=val('to')||'target';lines.push(`ferry_connection: conn.${from}.${to}`,'{',`    price: ${n(val('price'))}`,`    time: ${n(val('time'))}`,`    distance: ${n(val('distance'))}`);if(val('extra').trim())lines.push('',...rawLines(val('extra')));lines.push('}');path=`/def/ferry/connection/${from}_${to}.sii`;siiName=`${from}_${to}.sii`;exportBase=`${from}_${to}`;}
+  lines.push('}','');return {text:lines.join('\n'),path,exportBase,siiName};
+}
+function update(){const errs=validate(),g=generate();$('#output').value=g.text;$('#suggestedPath').textContent=g.path;$('#output').dataset.base=g.exportBase;$('#output').dataset.sii=g.siiName;const st=$('#status');if(errs.length){st.className='status bad';st.textContent=errs.length+' error'+(errs.length===1?'':'s')}else{st.className='status good';st.textContent='Ready'}$('#copyBtn').disabled=errs.length>0;$('#exportDefBtn').disabled=errs.length>0;$('#exportSiiBtn').disabled=errs.length>0;}
+async function copyText(text){try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text);return true}}catch{}const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch{}ta.remove();return ok}
+function download(ext){const base=$('#output').dataset.base||'ets2_definition',siiName=$('#output').dataset.sii||'definition.sii',blob=new Blob([$('#output').value],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=ext==='sii'?siiName:base+'.'+ext;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+$('#type').addEventListener('change',e=>{state.type=e.target.value;renderForm()});$('#ferrySubtype').addEventListener('change',e=>{state.sub=e.target.value;renderForm()});$('#infix').addEventListener('input',update);$('#copyBtn').addEventListener('click',async()=>{const old=$('#copyBtn').textContent;$('#copyBtn').textContent=(await copyText($('#output').value))?'Copied':'Copy failed';setTimeout(()=>$('#copyBtn').textContent=old,1200)});$('#exportDefBtn').addEventListener('click',()=>download('def'));$('#exportSiiBtn').addEventListener('click',()=>download('sii'));
+renderForm();
+})();
+</script>
+</body>
+</html>

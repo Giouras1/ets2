@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="ETS2 DEF Forge — generate country, city, existing-company depot, ferry and train DEF files for Euro Truck Simulator 2." />
+  <title>ETS2 DEF Forge</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">D<span>F</span></div>
+        <div>
+          <h1>ETS2 DEF Forge</h1>
+          <p>Map definition builder</p>
+        </div>
+      </div>
+      <div class="project-strip">
+        <label>
+          <span>Project</span>
+          <input id="projectName" value="My Map DEF" maxlength="60" />
+        </label>
+        <label>
+          <span>Mod infix</span>
+          <input id="modInfix" value="mymap" maxlength="12" spellcheck="false" />
+        </label>
+        <label class="compact-field">
+          <span>Target</span>
+          <input id="targetVersion" value="Current def.scs" maxlength="30" />
+        </label>
+      </div>
+      <div class="top-actions">
+        <button class="ghost" id="importProjectBtn" title="Import project JSON">Import</button>
+        <button class="ghost" id="exportProjectBtn" title="Save editable project JSON">Project JSON</button>
+        <button class="ghost" id="exportZipBtn">Export .zip</button>
+        <button class="primary" id="exportScsBtn">Export .scs</button>
+      </div>
+    </header>
+
+    <aside class="sidebar">
+      <div class="side-heading">Definition groups</div>
+      <nav id="categoryNav" class="category-nav" aria-label="Definition categories">
+        <button data-category="countries" class="nav-item active">
+          <span class="nav-icon">01</span><span><strong>Countries</strong><small>country_data</small></span><b id="count-countries">0</b>
+        </button>
+        <button data-category="cities" class="nav-item">
+          <span class="nav-icon">02</span><span><strong>Cities</strong><small>city_data</small></span><b id="count-cities">0</b>
+        </button>
+        <button data-category="companies" class="nav-item">
+          <span class="nav-icon">03</span><span><strong>Companies</strong><small>existing depots</small></span><b id="count-companies">0</b>
+        </button>
+        <button data-category="ferries" class="nav-item">
+          <span class="nav-icon">04</span><span><strong>Ports / Ferries</strong><small>ferry + routes</small></span><b id="count-ferries">0</b>
+        </button>
+      </nav>
+
+      <div class="side-heading side-heading-spaced">Export includes</div>
+      <div class="export-checks" id="exportChecks">
+        <label><input type="checkbox" data-export="countries" checked /> Countries</label>
+        <label><input type="checkbox" data-export="cities" checked /> Cities</label>
+        <label><input type="checkbox" data-export="companies" checked /> Companies</label>
+        <label><input type="checkbox" data-export="ferries" checked /> Ferries / trains</label>
+      </div>
+
+      <div class="side-note">
+        <strong>Safe-by-default output</strong>
+        <p>Uses infixed storage files and validates SCS token components before export.</p>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <section class="workspace-head">
+        <div>
+          <div class="eyebrow" id="categoryEyebrow">COUNTRY DEFINITIONS</div>
+          <h2 id="categoryTitle">Countries</h2>
+          <p id="categoryIntro">Register countries and generate their general <code>country_data</code> definitions.</p>
+        </div>
+        <div class="head-actions">
+          <div id="ferryModeSwitch" class="ferry-mode-switch" hidden>
+            <button class="mini active" data-head-ferry-sub="ports">Ports</button>
+            <button class="mini" data-head-ferry-sub="routes">Connections</button>
+          </div>
+          <a class="button-link ghost" href="single-def-builder.html" title="Open the simpler one-definition generator">Quick single DEF</a>
+          <button class="ghost" id="loadDemoBtn">Load demo</button>
+          <button class="primary" id="addEntryBtn">+ New country</button>
+        </div>
+      </section>
+
+      <section class="content-grid">
+        <div class="list-panel panel">
+          <div class="panel-title-row">
+            <div>
+              <h3 id="listTitle">Countries</h3>
+              <span id="listSubtitle">0 definitions</span>
+            </div>
+            <input id="searchEntries" class="search" type="search" placeholder="Filter…" />
+          </div>
+          <div id="entryList" class="entry-list"></div>
+        </div>
+
+        <div class="editor-panel panel">
+          <div id="emptyEditor" class="empty-state">
+            <div class="empty-symbol">+</div>
+            <h3>No definition selected</h3>
+            <p>Create a definition or select one from the list.</p>
+          </div>
+          <div id="editorContent" hidden>
+            <div class="editor-toolbar">
+              <div>
+                <span class="status-dot"></span><span id="editingLabel">Editing</span>
+              </div>
+              <div>
+                <button class="mini ghost" id="duplicateBtn">Duplicate</button>
+                <button class="mini danger" id="deleteBtn">Delete</button>
+              </div>
+            </div>
+            <form id="definitionForm" autocomplete="off"></form>
+          </div>
+        </div>
+
+        <div class="preview-panel panel">
+          <div class="panel-title-row preview-title-row">
+            <div>
+              <h3>Generated files</h3>
+              <span id="fileCount">0 files</span>
+            </div>
+            <div class="preview-actions">
+              <button class="mini ghost" id="copyFileBtn">Copy file</button>
+              <button class="mini ghost" id="downloadFileBtn">Download</button>
+            </div>
+          </div>
+          <div id="validationSummary" class="validation-summary ok">Ready</div>
+          <div class="file-browser">
+            <select id="fileSelect" aria-label="Generated file"></select>
+            <pre id="filePreview"><code>// Add a definition to see generated files.</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="guide panel" id="guidePanel"></section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <input id="projectFileInput" type="file" accept="application/json,.json" hidden />
+  <script src="app.js"></script>
+</body>
+</html>
